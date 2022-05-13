@@ -1,7 +1,9 @@
+# インポート
 import cv2
 import numpy as np
 from math import *
 
+# 定数の定義
 SIMULATOR_WINDOW_NAME = 'link simulator'
 FRAME_WIDTH = 10
 NODE_RADIUS = 15
@@ -42,7 +44,7 @@ class Frame:
         px1 = int(self.x1 * POSE_TO_PXL)
         py1 = self.Height - int(self.y1 * POSE_TO_PXL)
         cv2.line(img, (px0,py0), (px1,py1), FRAME_COLOR, self.frame_width)
-        cv2.circle(img, (px0,py0), NODE_RADIUS, FRAME_COLOR, NODE_WIDTH) 
+        # cv2.circle(img, (px0,py0), NODE_RADIUS, FRAME_COLOR, NODE_WIDTH) 
 
 if __name__ == '__main__':
 
@@ -50,16 +52,16 @@ if __name__ == '__main__':
     cv2.namedWindow('panel')
     cv2.createTrackbar('deg', 'panel', 0, 1080, lambda x: None)
 
-    l1 = 300
-    l2 = 1000
+    l1 = 200
+    l2 = 1100
     l3 = 500
-    l4 = 0
-    l5 = 1100
+    # l4 = 1000
+    l5 = 1000
 
     f1 = Frame(l1)
     f2 = Frame(l2)
     f3 = Frame(l3)
-    f4 = Frame(l4)
+    # f4 = Frame(l4)
     f5 = Frame(l5)
 
     img = np.zeros((600,1000,3), np.uint8)
@@ -70,24 +72,30 @@ if __name__ == '__main__':
         img[:,:,:] = 255
 
         deg = cv2.getTrackbarPos('deg', 'panel')
-        (x0, y0) = (400, 1500)
+        (x0, y0) = (800, 1000)
         x3, y3 = x0+l5, y0
         f1.set_position(x0, y0, deg*pi/180)
         (x1, y1) = f1.get_EndPosition()
         L = sqrt( (x3-x1)**2 + (y3-y1)**2 )
-        theta2 = acos( (l2**2 + L**2 - l3**2) / (2*l2*L) ) + atan2(y3-y1, x3-x1)
+        if l1==l3 and l2==l5:
+            if sin(deg*pi/180)>0:
+                theta2 = acos( (l2**2 + L**2 - l3**2) / (2*l2*L) ) + atan2(y3-y1, x3-x1)
+            else:
+                theta2 = acos( (l2**2 + L**2 - l3**2) / (2*l2*L) ) - atan2(y3-y1, x3-x1)
+        else:
+            theta2 = acos( (l2**2 + L**2 - l3**2) / (2*l2*L) ) + atan2(y3-y1, x3-x1)
         f2.set_position(x1, y1, theta2)
         (x2, y2) = f2.get_EndPosition()
         theta3 = atan2(y3-y2, x3-x2)
         f3.set_position(x2, y2, theta3)
-        f4.set_position(x3, y3, theta3)
-        x4, y4 = f4.get_EndPosition()
+        # f4.set_position(x3, y3, theta3)
+        # x4, y4 = f4.get_EndPosition()
         f5.set_position(x0, y0, atan2(y3-y0, x3-x0) )
 
         f1.drawFrame(img)
         f2.drawFrame(img)
         f3.drawFrame(img)
-        f4.drawFrame(img)
+        # f4.drawFrame(img)
         f5.drawFrame(img)
 
         cv2.imshow(SIMULATOR_WINDOW_NAME, img)
